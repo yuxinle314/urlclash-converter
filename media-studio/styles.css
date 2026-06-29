@@ -531,6 +531,37 @@ body {
   margin-top: 24px;
 }
 
+.footer code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--fill);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+.saveloc {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.saveloc strong {
+  font-weight: 600;
+}
+
+.linkbtn {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.linkbtn:hover {
+  text-decoration: underline;
+}
+
 /* ---------------- Toast ---------------- */
 .toast {
   position: fixed;

@@ -87,7 +87,7 @@
               <img id="cam-out-img" class="result-thumb" alt="压缩结果预览" />
               <dl class="result-meta" id="cam-out-meta"></dl>
             </div>
-            <button class="btn btn-primary full" id="cam-download">下载图片</button>
+            <button class="btn btn-primary full" id="cam-download">保存到 pics/</button>
           </div>
         </section>
 
@@ -140,7 +140,7 @@
               <img id="img-out-img" class="result-thumb" alt="压缩结果预览" />
               <dl class="result-meta" id="img-out-meta"></dl>
             </div>
-            <button class="btn btn-primary full" id="img-download">下载图片</button>
+            <button class="btn btn-primary full" id="img-download">保存到 pics/</button>
           </div>
         </section>
 
@@ -192,14 +192,18 @@
             <dl class="result-meta" id="aud-out-meta"></dl>
             <div class="row">
               <button class="btn btn-secondary" id="aud-play-out">▶ 试听结果</button>
-              <button class="btn btn-primary" id="aud-download">下载 .c2</button>
+              <button class="btn btn-primary" id="aud-download">保存到 voices/</button>
             </div>
           </div>
         </section>
       </main>
 
       <footer class="footer">
-        <p>纯本地处理 · 数据不上传 · 摄像头/麦克风需在 HTTPS 或 localhost 下授权</p>
+        <p class="saveloc">
+          输出文件夹：<strong id="saveloc-name">浏览器下载</strong>
+          <button class="linkbtn" id="saveloc-btn" hidden>选择文件夹…</button>
+        </p>
+        <p>照片存入 <code>pics/</code>，音频存入 <code>voices/</code> · 纯本地处理，数据不上传 · 摄像头/麦克风需在 HTTPS 或 localhost 下授权</p>
       </footer>
     </div>
 

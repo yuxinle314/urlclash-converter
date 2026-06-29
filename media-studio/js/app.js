@@ -1,9 +1,53 @@
 // 影音工坊 · 主逻辑
-import { formatBytes, downloadBlob, toast, bindSegmented, fmtSeconds } from "./util.js";
+import { formatBytes, downloadBlob, toast, bindSegmented, fmtSeconds, stamp } from "./util.js";
 import { compressToTarget, loadBitmap } from "./image.js";
 import { encodeToCodec2, decodeCodec2ToWav } from "./audio.js";
+import { save, supported as fsSupported, restoreBaseDir, chooseBaseDir, currentBaseName } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
+
+/* ============================================================
+   输出文件夹 (pics / voices)
+   ============================================================ */
+function updateSaveLocLabel() {
+  const el = $("saveloc-name");
+  if (!el) return;
+  const n = currentBaseName();
+  el.textContent = n ? `${n}/（pics, voices）` : "未设置（保存时将提示选择）";
+}
+
+/** 统一保存出口: 优先写入所选文件夹的子目录, 否则普通下载 */
+async function saveOutput(subdir, filename, blob) {
+  const res = await save(subdir, filename, blob, () => downloadBlob(blob, filename));
+  if (res.method === "fs") {
+    toast(`已保存到 ${res.path}`);
+    updateSaveLocLabel();
+  } else if (res.method === "download") {
+    toast(`已下载 ${filename}`);
+  }
+  // cancel: 用户取消选择, 不提示
+}
+
+async function initStorage() {
+  const nameEl = $("saveloc-name");
+  const btn = $("saveloc-btn");
+  if (!fsSupported()) {
+    nameEl.textContent = "浏览器下载（当前浏览器不支持按文件夹保存）";
+    return;
+  }
+  btn.hidden = false;
+  await restoreBaseDir();
+  updateSaveLocLabel();
+  btn.addEventListener("click", async () => {
+    try {
+      await chooseBaseDir();
+      updateSaveLocLabel();
+      toast("已设置输出文件夹");
+    } catch (e) {
+      if (e && e.name !== "AbortError") toast("选择失败: " + (e.message || e));
+    }
+  });
+}
 
 /* ============================================================
    标签切换
@@ -40,7 +84,6 @@ function renderImageResult({ imgEl, metaEl, cardEl, dlBtn }, result, originalByt
 
   const ext = blob.type === "image/webp" ? "webp" : "jpg";
   const kb = Math.round(blob.size / 1024);
-  const filename = `${baseName}_${kb}kb_${width}x${height}.${ext}`;
 
   const ok = status === "ok";
   const badge = ok
@@ -59,7 +102,9 @@ function renderImageResult({ imgEl, metaEl, cardEl, dlBtn }, result, originalByt
 
   metaEl.innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
   cardEl.hidden = false;
-  dlBtn.onclick = () => downloadBlob(blob, filename);
+  // 照片统一保存到 pics/, 文件名带时间戳避免覆盖
+  dlBtn.onclick = () =>
+    saveOutput("pics", `${baseName}_${kb}kb_${width}x${height}_${stamp()}.${ext}`, blob);
 }
 
 /* ============================================================
@@ -436,7 +481,7 @@ function initAudio() {
         progressBar.style.width = Math.max(5, Math.round(r * 100)) + "%";
       });
       progressBar.style.width = "100%";
-      resultName = `${source.name || "voice"}_codec2_${mode}.c2`;
+      resultName = `${source.name || "voice"}_codec2_${mode}_${stamp()}.c2`;
 
       const ratio = source.bytes / resultBlob.size;
       metaEl.innerHTML = [
@@ -476,13 +521,14 @@ function initAudio() {
     }
   });
 
-  dlBtn.addEventListener("click", () => resultBlob && downloadBlob(resultBlob, resultName));
+  dlBtn.addEventListener("click", () => resultBlob && saveOutput("voices", resultName, resultBlob));
 }
 
 /* ============================================================
    启动
    ============================================================ */
 initTabs();
+initStorage();
 initCamera();
 initImageFile();
 initAudio();

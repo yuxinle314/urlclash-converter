@@ -60,3 +60,10 @@ export function bindSegmented(group, onChange) {
 export function fmtSeconds(s) {
   return s.toFixed(1);
 }
+
+/** 生成文件名用的时间戳 MMDD-HHMMSS, 避免同名覆盖 */
+export function stamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
